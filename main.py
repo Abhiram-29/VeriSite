@@ -1,9 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from urllib.parse import urlparse
-import re
 import requests
-import unicodedata
 import socket
 from datetime import datetime, timezone
 import ssl
@@ -11,13 +9,8 @@ from OpenSSL import crypto
 import whois
 from fastapi.middleware.cors import CORSMiddleware 
 import logging
-import joblib
-import numpy as np
-from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.preprocessing import OrdinalEncoder
-from sklearn.pipeline import Pipeline
 import dill
-
+import pandas as pd
 
 app = FastAPI()
 
@@ -32,52 +25,6 @@ app.add_middleware(
     allow_methods=["*"],  
     allow_headers=["*"],  
 )
-
-# Define custom transformers
-class FillMissingValues(BaseEstimator, TransformerMixin):
-    def __init__(self):
-        self.sslMean = 95.42572488662911
-        self.domainAgeMean = 4768.3417287504235
-
-    def fit(self, X, y=None):
-        self.sslMean = X['sslAge'].mean() if 'sslAge' in X else self.sslMean
-        self.domainAgeMean = X['domainAge'].mean() if 'domainAge' in X else self.domainAgeMean
-        return self
-
-    def transform(self, X):
-        X = X.copy()
-        X['PageRank'].fillna(10000000, inplace=True)
-        X['registrar'].fillna("", inplace=True)
-        X['sslAge'].fillna(self.sslMean, inplace=True)
-        X['domainAge'].fillna(self.domainAgeMean, inplace=True)
-        X['domain'].fillna("", inplace=True)
-        return X
-
-class ExtractDomain(BaseEstimator, TransformerMixin):
-    def __init__(self):
-        pass
-
-    def fit(self, X, y=None):
-        return self
-
-    def transform(self, X):
-        X = X.copy()
-        X['domain'] = X['domain'].apply(lambda url: url.split('.')[-1] if len(url.split('.')) > 2 else 'None')
-        return X
-
-class OrdinalEncoderWrapper(BaseEstimator, TransformerMixin):
-    def __init__(self, encoded_columns):
-        self.encoded_columns = encoded_columns
-        self.encoder = OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-1)
-
-    def fit(self, X, y=None):
-        self.encoder.fit(X[self.encoded_columns])
-        return self
-
-    def transform(self, X):
-        X = X.copy()
-        X[self.encoded_columns] = self.encoder.transform(X[self.encoded_columns])
-        return X
 
 # Load the trained model
 model_path = 'Model.pkl'
@@ -143,7 +90,7 @@ def get_page_rank(domain):
     try:
         url = 'https://openpagerank.com/api/v1.0/getPageRank'
         query = {'domains[]': [domain]}
-        headers = {'API-OPR': 'YOUR_API_KEY_HERE'}
+        headers = {'API-OPR': 's8wkos0kkckcgos4sock0s448k4o8o8gko4g0ow4 '}
         response = requests.get(url, headers=headers, params=query)
         response.raise_for_status()  # Check for HTTP errors
         data = response.json()
@@ -185,40 +132,47 @@ def extract_data(data: URLData):
         logger.error(f"Error processing data: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
+
 @app.post("/predict")
 def predict_score(data: URLData):
     logger.info(f"Received data for prediction: {data}")
     url = data.url
     try:
+        # Extract features
         url_length = len(url)
         url_depth = calculate_url_depth(url)
         protocol = get_protocol(url)
         domain = get_domain(url)
         ssl_age = get_ssl_age(domain)
         domain_age, registrar = get_domain_info(domain)
-        page_rank = get_page_rank(domain)
+        page_rank = int(get_page_rank(domain))
 
-        # Prepare features for prediction
-        features = np.array([[
-            url_length,
-            url_depth,
-            protocol,
-            domain,
-            domain_age,
-            registrar,
-            ssl_age,
-            page_rank
-        ]])
+        # Create a dictionary of features
+        features_dict = {
+            "urlLength": [url_length],
+            "urlDepth": [url_depth],
+            "protocol": [protocol],
+            "domain": [domain],
+            "domainAge": [domain_age],
+            "registrar": [registrar],
+            "sslAge": [ssl_age],
+            "PageRank": [page_rank]
+        }
 
-        # Predict score using the loaded model
-        prediction = model.predict(features)
-        score = prediction[0]
+        # Convert to pandas DataFrame
+        df = pd.DataFrame(features_dict)
+        logger.info("Features Extracted",features_dict)
+        # Make prediction
+        prediction = model.predict_proba(df)
+        score = prediction[0][1]
 
         result = {
-            "predictedScore": score
+            "predictedScore": float(score)  # Convert to float for JSON serialization
         }
+
         logger.info(f"Prediction result: {result}")
         return result
+
     except Exception as e:
         logger.error(f"Error making prediction: {e}")
         raise HTTPException(status_code=400, detail=str(e))
