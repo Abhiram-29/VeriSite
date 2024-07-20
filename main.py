@@ -16,6 +16,8 @@ import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import OrdinalEncoder
 from sklearn.pipeline import Pipeline
+import dill
+
 
 app = FastAPI()
 
@@ -78,9 +80,12 @@ class OrdinalEncoderWrapper(BaseEstimator, TransformerMixin):
         return X
 
 # Load the trained model
-model_path = 'full_model_pipeline.pkl'
+model_path = 'Model.pkl'
+def load_model(filename):
+    with open(filename, 'rb') as file:
+        return dill.load(file)
 try:
-    model = joblib.load(model_path)
+    model = load_model(model_path)
     logger.info(f"Model loaded from {model_path}")
 except Exception as e:
     logger.error(f"Error loading model: {e}")
