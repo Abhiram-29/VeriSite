@@ -13,14 +13,30 @@
     .data-label {
       font-weight: bold;
     }
+    #fetch-button {
+      margin: 10px 0;
+      padding: 5px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    #fetch-button:hover {
+      background-color: #45a049;
+    }
   </style>
 </head>
 <body>
   <div id="content">
     <h2>URL Data Extractor</h2>
+    <button id="fetch-button">Fetch URL Data</button>
     <div id="data-container">
       Loading...
     </div>
+    <div id="prediction-container">
+        Loading...
+      </div>
   </div>
   <script src="popup.js"></script>
 </body>
