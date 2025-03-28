@@ -1,0 +1,6 @@
+env
+bertDataV3.csv
+malicious_phish.csv
+test_data.csv
+train_data.csv
+.ipynb_checkpoints
