@@ -6,7 +6,7 @@ Verisite is a browser extension, that estimates the probability of a website bei
 
 ---
 
-![Screenshot of the extension popup showing a benign website]((https://github.com/Abhiram-29/VeriSite/blob/main/images/92.png))
+![Screenshot of the extension popup showing a benign website](https://github.com/Abhiram-29/VeriSite/blob/main/images/92.png)
 Extension showing a safe website score.
 
 ---
