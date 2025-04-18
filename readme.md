@@ -6,17 +6,17 @@ Verisite is a browser extension, that estimates the probability of a website bei
 
 ---
 
-![Screenshot of the extension popup showing a benign website](images\92.png)
+![Screenshot of the extension popup showing a benign website]([images\92.png](https://github.com/Abhiram-29/VeriSite/blob/main/images/92.png))
 Extension showing a safe website score.
 
 ---
 
-![Screenshot of the extension popup showing a malicious website](images\47.png)
+![Screenshot of the extension popup showing a malicious website](https://github.com/Abhiram-29/VeriSite/blob/main/images/47.png)
 Extension showing a malicious website score.
 
 ---
 
-![Screenshot of the model architecture or a key feature](images\14.png)
+![Screenshot of the model architecture or a key feature](https://github.com/Abhiram-29/VeriSite/blob/main/images/14.png)
 Another malicious website with a lower score.
 
 ### Note
