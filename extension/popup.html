@@ -1,40 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Verisite</title>
     <style>
-        body {
-            width: 300px;
-            font-family: Arial, sans-serif;
-            padding: 10px;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:disabled {
-            background-color: #c0c0c0;
-        }
-        #result, #extractedContent {
-            margin-top: 10px;
-        }
-        .content-item {
-            margin-bottom: 5px;
-        }
+      body {
+        width: 300px;
+        font-family: Arial, sans-serif;
+        padding: 10px;
+        text-align: center; /* Center content in the body */
+      }
+      h1 {
+        margin-bottom: 15px;
+      }
+      button {
+        width: 100%;
+        padding: 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1em;
+        transition: background-color 0.2s ease;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      button:disabled {
+        background-color: #c0c0c0;
+        cursor: not-allowed;
+      }
+
+      /* --- Score Visualization Styles --- */
+      #scoreContainer {
+        margin: 20px auto; /* Center the container */
+        width: 120px; /* Size of the whole visualization */
+        height: 120px;
+        position: relative; /* Needed for absolute positioning of text */
+      }
+
+      #scoreContainer svg {
+        width: 100%;
+        height: 100%;
+        transform: rotate(-90deg); /* Start the progress bar at the top */
+        /* This transform should ideally be on the SVG element */
+      }
+
+      #scoreContainer .score-circle {
+        fill: none;
+        stroke-width: 10; /* Thickness of the circle bar */
+        transition: stroke-dashoffset 0.5s ease; /* Smooth animation for progress */
+      }
+
+      #scoreContainer .score-track {
+        stroke: #e6e6e6; /* Light grey background track */
+      }
+
+      #scoreContainer .score-progress {
+        /* Stroke color will be set by JS/classes */
+        stroke-linecap: round; /* Round ends of the progress bar */
+        /* stroke-dasharray and stroke-dashoffset will be set by JS */
+      }
+
+      .score-progress.score-green {
+        stroke: #28a745; /* Green color for high score */
+      }
+
+      .score-progress.score-red {
+        stroke: #dc3545; /* Red color for low score */
+      }
+
+      #scoreText {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%); /* Center the text precisely */
+        font-size: 1.8em; /* Size of the score number */
+        font-weight: bold;
+        color: #333;
+      }
+
+      /* --- Other elements --- */
+      #errorMessage {
+        /* New element for displaying non-score errors */
+        margin-top: 15px;
+        color: red;
+        font-size: 0.9em;
+        min-height: 1em; /* Reserve space to prevent layout shifts */
+      }
+
+      #extractedContent {
+        margin-top: 15px;
+        text-align: left;
+      }
+      .content-item {
+        margin-bottom: 5px;
+        font-size: 0.9em;
+        color: #555;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Verisite</h1>
+
     <button id="predictButton">Predict Score</button>
-    <div id="result"></div>
+
+    <!-- Score Visualization Area -->
+    <div id="scoreContainer">
+      <svg viewBox="0 0 100 100">
+        <!-- Background circle track -->
+        <circle
+          class="score-circle score-track"
+          cx="50"
+          cy="50"
+          r="45"
+        ></circle>
+        <!-- Progress circle (will be updated by JS) -->
+        <circle
+          class="score-circle score-progress"
+          cx="50"
+          cy="50"
+          r="45"
+        ></circle>
+      </svg>
+      <div id="scoreText"></div>
+      <!-- Text displaying the score -->
+    </div>
+
+    <!-- Area for errors or processing messages BEFORE score is ready -->
+    <div id="errorMessage"></div>
+
+    <!-- Potentially for other content extraction results later -->
     <div id="extractedContent"></div>
+
     <script src="popup.js"></script>
-</body>
+  </body>
 </html>
